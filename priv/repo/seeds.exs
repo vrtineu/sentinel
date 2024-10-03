@@ -23,7 +23,9 @@ generate_users = fn size ->
 
   users =
     Enum.map(1..(size - 1), fn _ ->
-      Map.merge(default_data, %{is_active: Enum.random([true, false])})
+      is_active = Enum.random([true, false])
+      deactivated_at = unless is_active, do: utc_now, else: nil
+      Map.merge(default_data, %{is_active: is_active, deactivated_at: deactivated_at})
     end)
 
   # ensure at least one user is active
@@ -35,10 +37,10 @@ end
 camera_data = fn %User{} = user ->
   utc_now = DateTime.utc_now() |> DateTime.truncate(:second)
   default_data = %{user_id: user.id, inserted_at: utc_now, updated_at: utc_now}
-  camera_status = if user.is_active, do: Enum.random([true, false]), else: false
 
   cameras =
     Enum.map(1..49, fn _ ->
+      camera_status = if user.is_active, do: Enum.random([true, false]), else: false
       Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: camera_status})
     end)
 

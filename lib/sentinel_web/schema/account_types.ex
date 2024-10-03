@@ -8,6 +8,7 @@ defmodule SentinelWeb.Schema.AccountTypes do
     field :id, :id
     field :name, :string
     field :is_active, :boolean
+    field :deactivated_at, :datetime
     field :cameras, list_of(:camera)
     field :inserted_at, :datetime
     field :updated_at, :datetime
