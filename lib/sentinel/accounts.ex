@@ -7,6 +7,7 @@ defmodule Sentinel.Accounts do
   alias Sentinel.Repo
 
   alias Sentinel.Accounts.User
+  alias Sentinel.Devices.Camera
 
   @doc """
   Returns the list of users.
@@ -19,6 +20,30 @@ defmodule Sentinel.Accounts do
   """
   def list_users do
     Repo.all(User)
+  end
+
+  @doc """
+  Returns the list of users and their active cameras.
+
+  ## Examples
+
+      iex> list_users_with_active_cameras()
+      [%User{cameras: [%Camera{}, ...]}, ...]
+
+  """
+  def list_users_with_active_cameras() do
+    query =
+      from u in User,
+        left_join: c in Camera,
+        on: u.id == c.user_id and c.is_active == true,
+        distinct: u.id,
+        select: u
+
+    users = Repo.all(query)
+
+    active_cameras_query = from c in Camera, where: c.is_active == true
+
+    Repo.preload(users, cameras: active_cameras_query)
   end
 
   @doc """

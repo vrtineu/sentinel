@@ -15,6 +15,22 @@ defmodule Sentinel.AccountsTest do
       assert Accounts.list_users() == [user]
     end
 
+    test "list_users_with_active_cameras/0 returns all users" do
+      user_fixture(%{
+        cameras: [%{brand: "Hikvision", is_active: true}, %{brand: "Intelbras", is_active: false}]
+      })
+
+      [result] = Accounts.list_users_with_active_cameras()
+
+      assert length(result.cameras) == 1
+
+      [camera] = result.cameras
+
+      assert camera.brand == "Hikvision"
+      assert camera.is_active == true
+      refute Enum.any?(result.cameras, fn camera -> camera.brand == "Intelbras" end)
+    end
+
     test "get_user!/1 returns the user with given id" do
       user = user_fixture()
       assert Accounts.get_user!(user.id) == user
@@ -32,7 +48,7 @@ defmodule Sentinel.AccountsTest do
       valid_attrs = %{
         name: "some name",
         is_active: true,
-        cameras: [%{brand: "Hikvision", active: true}, %{brand: "Intelbras", active: false}]
+        cameras: [%{brand: "Hikvision", is_active: true}, %{brand: "Intelbras", is_active: false}]
       }
 
       assert {:ok, %User{} = user} = Accounts.create_user(valid_attrs)
