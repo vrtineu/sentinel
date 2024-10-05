@@ -31,3 +31,14 @@ config :logger, level: :warning
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :sentinel, Sentinel.Mailer, adapter: Swoosh.Adapters.Test
+
+config :sentinel, Sentinel.Notifications.Email,
+  max_retries: 3,
+  retry_interval: 50,
+  dead_letter_interval: 200
+
+config :sentinel, Sentinel.Notifications.EmailState,
+  circuit_breaker_threshold: 5,
+  circuit_breaker_timeout: 100

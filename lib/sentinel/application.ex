@@ -17,7 +17,8 @@ defmodule Sentinel.Application do
       # Start a worker by calling: Sentinel.Worker.start_link(arg)
       # {Sentinel.Worker, arg},
       # Start to serve requests, typically the last entry
-      SentinelWeb.Endpoint
+      SentinelWeb.Endpoint,
+      Sentinel.Notifications.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -64,3 +64,14 @@ config :phoenix, :plug_init_mode, :runtime
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+config :sentinel, Sentinel.Mailer, adapter: Swoosh.Adapters.Local
+
+config :sentinel, Sentinel.Notifications.Email,
+  max_retries: 3,
+  retry_interval: 5_000,
+  dead_letter_interval: 120_000
+
+config :sentinel, Sentinel.Notifications.EmailState,
+  circuit_breaker_threshold: 5,
+  circuit_breaker_timeout: 60_000
