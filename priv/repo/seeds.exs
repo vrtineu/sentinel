@@ -19,17 +19,22 @@ camera_brands = ~w(Intelbras Hikvision Giga Vivotek)
 
 generate_users = fn size ->
   utc_now = DateTime.utc_now() |> DateTime.truncate(:second)
-  default_data = %{name: Enum.random(user_names), inserted_at: utc_now, updated_at: utc_now}
+  default_data = %{inserted_at: utc_now, updated_at: utc_now}
 
   users =
     Enum.map(1..(size - 1), fn _ ->
       is_active = Enum.random([true, false])
       deactivated_at = unless is_active, do: utc_now, else: nil
-      Map.merge(default_data, %{is_active: is_active, deactivated_at: deactivated_at})
+
+      Map.merge(default_data, %{
+        name: Enum.random(user_names),
+        is_active: is_active,
+        deactivated_at: deactivated_at
+      })
     end)
 
   # ensure at least one user is active
-  control_record = Map.merge(default_data, %{is_active: true})
+  control_record = Map.merge(default_data, %{name: Enum.random(user_names), is_active: true})
 
   [control_record | users]
 end
