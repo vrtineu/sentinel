@@ -16,6 +16,7 @@ alias Sentinel.Devices.Camera
 
 user_names = ~w(Vinicius Livia Lucas Rodrigo Vitória Ricardo Esther Felipe)
 camera_brands = ~w(Intelbras Hikvision Giga Vivotek)
+camera_place = ~w(Entrance LivingRoom Kitchen Bedroom Bathroom)
 
 generate_users = fn size ->
   utc_now = DateTime.utc_now() |> DateTime.truncate(:second)
@@ -42,16 +43,22 @@ end
 camera_data = fn %User{} = user ->
   utc_now = DateTime.utc_now() |> DateTime.truncate(:second)
   default_data = %{user_id: user.id, inserted_at: utc_now, updated_at: utc_now}
+  symbols = Enum.to_list(?a..?z) ++ Enum.to_list(?A..?Z) ++ Enum.to_list(?0..?9)
 
   cameras =
     Enum.map(1..49, fn _ ->
+      random_string = for _ <- 1..10, into: "", do: <<Enum.random(symbols)>>
+      camera_name = "#{random_string} #{Enum.random(camera_place)}"
       camera_status = if user.is_active, do: Enum.random([true, false]), else: false
-      Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: camera_status})
+      Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: camera_status, name: camera_name})
     end)
 
+
+  random_string = for _ <- 1..10, into: "", do: <<Enum.random(symbols)>>
+  camera_name = "#{random_string} #{Enum.random(camera_place)}"
   # ensure at least one camera is active if user is also active
   control_record =
-    Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: user.is_active})
+    Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: user.is_active, name: camera_name})
 
   [control_record | cameras]
 end

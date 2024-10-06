@@ -6,6 +6,7 @@ defmodule SentinelWeb.Schema.DeviceTypes do
   @desc "The users' security camera"
   object :camera do
     field :id, :id
+    field :name, :string
     field :brand, :string
     field :is_active, :boolean
     field :user, :user

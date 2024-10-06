@@ -16,7 +16,8 @@ defmodule Sentinel.DevicesFixtures do
       attrs
       |> Enum.into(%{
         brand: "some brand",
-        is_active: true
+        is_active: true,
+        name: "some_name"
       })
       |> Map.put(:user_id, user.id)
       |> Sentinel.Devices.create_camera()

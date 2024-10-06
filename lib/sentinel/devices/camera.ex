@@ -4,6 +4,7 @@ defmodule Sentinel.Devices.Camera do
   alias Sentinel.Accounts.User
 
   schema "cameras" do
+    field :name, :string
     field :brand, :string
     field :is_active, :boolean, default: false
     belongs_to :user, User
@@ -14,15 +15,15 @@ defmodule Sentinel.Devices.Camera do
   @doc false
   def changeset(camera, attrs) do
     camera
-    |> cast(attrs, [:brand, :is_active, :user_id])
-    |> validate_required([:brand, :is_active, :user_id])
+    |> cast(attrs, [:name, :brand, :is_active, :user_id])
+    |> validate_required([:name, :brand, :is_active, :user_id])
     |> foreign_key_constraint(:user_id)
   end
 
   @doc false
   def changeset_for_user(camera, attrs) do
     camera
-    |> cast(attrs, [:brand, :is_active])
-    |> validate_required([:brand, :is_active])
+    |> cast(attrs, [:name, :brand, :is_active])
+    |> validate_required([:name, :brand, :is_active])
   end
 end

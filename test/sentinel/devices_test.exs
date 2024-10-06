@@ -23,11 +23,12 @@ defmodule Sentinel.DevicesTest do
 
     test "create_camera/1 with valid data creates a camera" do
       user = user_fixture()
-      valid_attrs = %{brand: "some brand", is_active: true, user_id: user.id}
+      valid_attrs = %{brand: "some brand", is_active: true, user_id: user.id, name: "some_name"}
 
       assert {:ok, %Camera{} = camera} = Devices.create_camera(valid_attrs)
       assert camera.brand == "some brand"
       assert camera.is_active == true
+      assert camera.name == "some_name"
     end
 
     test "create_camera/1 with invalid data returns error changeset" do

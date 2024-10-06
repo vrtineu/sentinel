@@ -81,14 +81,14 @@ defmodule SentinelWeb.SchemaTest do
   end
 
   defp create_user_with_cameras(_) do
-    cameras = [%{brand: "Hikvision", is_active: true}, %{brand: "Intelbras", is_active: false}]
+    cameras = [%{brand: "Hikvision", is_active: true, name: "some_name"}, %{brand: "Intelbras", is_active: false, name: "some name"}]
     user = user_fixture(%{cameras: cameras})
 
     %{user: user}
   end
 
   defp create_inactive_user_with_cameras() do
-    cameras = [%{brand: "Hikvision", is_active: false}, %{brand: "Intelbras", is_active: false}]
+    cameras = [%{brand: "Hikvision", is_active: false, name: "some_name"}, %{brand: "Intelbras", is_active: false, name: "some_name"}]
 
     user =
       user_fixture(%{

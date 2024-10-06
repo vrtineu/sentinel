@@ -17,7 +17,7 @@ defmodule Sentinel.AccountsTest do
 
     test "list_users_with_active_cameras/0 returns all users" do
       user_fixture(%{
-        cameras: [%{brand: "Hikvision", is_active: true}, %{brand: "Intelbras", is_active: false}]
+        cameras: [%{brand: "Hikvision", is_active: true, name: "some_name"}, %{brand: "Intelbras", is_active: false, name: "some_name"}]
       })
 
       [result] = Accounts.list_users_with_active_cameras()
@@ -48,7 +48,7 @@ defmodule Sentinel.AccountsTest do
       valid_attrs = %{
         name: "some name",
         is_active: true,
-        cameras: [%{brand: "Hikvision", is_active: true}, %{brand: "Intelbras", is_active: false}]
+        cameras: [%{brand: "Hikvision", is_active: true, name: "some_name"}, %{brand: "Intelbras", is_active: false, name: "some_name"}]
       }
 
       assert {:ok, %User{} = user} = Accounts.create_user(valid_attrs)
