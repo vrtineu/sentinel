@@ -12,7 +12,8 @@ defmodule Sentinel.AccountsFixtures do
       attrs
       |> Enum.into(%{
         is_active: true,
-        name: "some name"
+        name: "some name",
+        email: "dummy@mail.com"
       })
       |> Sentinel.Accounts.create_user()
 

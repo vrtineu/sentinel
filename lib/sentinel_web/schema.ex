@@ -18,4 +18,13 @@ defmodule SentinelWeb.Schema do
       resolve(&Resolvers.Accounts.list_all_users_with_active_cameras/3)
     end
   end
+
+  mutation do
+    @desc "Send a notification to users that have cameras from a specific brand"
+    field :notify_users_with_cameras_from_brand, :string do
+      arg(:brand, :camera_brand)
+      arg(:only_active, :boolean, default_value: false)
+      resolve(&Resolvers.Accounts.notify_users_with_cameras_from_brand/3)
+    end
+  end
 end

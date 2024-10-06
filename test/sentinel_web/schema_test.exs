@@ -1,8 +1,10 @@
 defmodule SentinelWeb.SchemaTest do
-  use SentinelWeb.ConnCase, async: true
+  use SentinelWeb.ConnCase, async: false
 
   import Sentinel.AccountsFixtures
+  import Swoosh.TestAssertions
 
+  setup :set_swoosh_global
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
@@ -80,6 +82,80 @@ defmodule SentinelWeb.SchemaTest do
                }
              }
     end
+
+    defp users_with_active_cameras_query(cameraName \\ "") do
+      """
+      query {
+        usersWithActiveCameras(cameraName: "#{cameraName}") {
+          data {
+            name
+            isActive
+            deactivatedAt
+            cameras {
+              name
+              brand
+              isActive
+            }
+          }
+          pageNumber
+          pageSize
+          totalData
+          totalPages
+        }
+      }
+      """
+    end
+  end
+
+  describe "mutation: notifyUsersWithCamerasFromBrand" do
+    setup [:create_users_with_different_camera_brands]
+
+    test "notifies users with cameras of a specific brand", %{conn: conn} do
+      conn =
+        post(conn, "/api", %{
+          "query" => notify_users_mutation("HIKVISION")
+        })
+
+      assert json_response(conn, 200) == %{
+        "data" => %{
+          "notifyUsersWithCamerasFromBrand" => "Notification enqueued to 2 users with Hikvision cameras"
+        }
+      }
+    end
+
+    test "notifies only active users when only_active is true", %{conn: conn} do
+      conn =
+        post(conn, "/api", %{
+          "query" => notify_users_mutation("INTELBRAS", true)
+        })
+
+      assert json_response(conn, 200) == %{
+        "data" => %{
+          "notifyUsersWithCamerasFromBrand" => "Notification enqueued to 1 user with Intelbras cameras"
+        }
+      }
+    end
+
+    test "returns appropriate message when no users have cameras of the specified brand", %{conn: conn} do
+      conn =
+        post(conn, "/api", %{
+          "query" => notify_users_mutation("GIGA")
+        })
+
+      assert json_response(conn, 200) == %{
+        "data" => %{
+          "notifyUsersWithCamerasFromBrand" => "No users found with Giga cameras"
+        }
+      }
+    end
+
+    defp notify_users_mutation(brand, only_active \\ false) do
+      """
+      mutation {
+        notifyUsersWithCamerasFromBrand(brand: #{brand}, onlyActive: #{only_active})
+      }
+      """
+    end
   end
 
   defp create_user_with_cameras(_) do
@@ -109,26 +185,22 @@ defmodule SentinelWeb.SchemaTest do
     %{user: user}
   end
 
-  defp users_with_active_cameras_query(cameraName \\ "") do
-    """
-    query {
-      usersWithActiveCameras(cameraName: "#{cameraName}") {
-        data {
-          name
-          isActive
-          deactivatedAt
-          cameras {
-            name
-            brand
-            isActive
-          }
-        }
-        pageNumber
-        pageSize
-        totalData
-        totalPages
-      }
-    }
-    """
+  defp create_users_with_different_camera_brands(_) do
+    user1 = user_fixture(%{
+      cameras: [%{brand: "Hikvision", is_active: true, name: "Cam1"}],
+      is_active: true
+    })
+
+    user2 = user_fixture(%{
+      cameras: [%{brand: "Hikvision", is_active: true, name: "Cam2"}],
+      is_active: false
+    })
+
+    user3 = user_fixture(%{
+      cameras: [%{brand: "Intelbras", is_active: true, name: "Cam3"}],
+      is_active: true
+    })
+
+    %{users: [user1, user2, user3]}
   end
 end

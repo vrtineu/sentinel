@@ -40,13 +40,56 @@ defmodule Sentinel.AccountsTest do
       refute Enum.any?(user.cameras, fn cam -> cam.brand == "Intelbras" end)
     end
 
+    test "list_users_by_camera_brand/2 returns users with cameras of specified brand" do
+      user1 = user_fixture(%{
+        cameras: [
+          %{brand: "Hikvision", is_active: true, name: "Cam1"},
+          %{brand: "Intelbras", is_active: true, name: "Cam2"}
+        ]
+      })
+      user2 = user_fixture(%{
+        cameras: [
+          %{brand: "Hikvision", is_active: true, name: "Cam3"}
+        ]
+      })
+      _user3 = user_fixture(%{
+        cameras: [
+          %{brand: "Giga", is_active: true, name: "Cam4"}
+        ]
+      })
+
+      result = Accounts.list_users_by_camera_brand("Hikvision")
+
+      assert length(result) == 2
+      assert Enum.all?(result, fn user -> user.id in [user1.id, user2.id] end)
+    end
+
+    test "list_users_by_camera_brand/2 returns only active users when :only_active option is true" do
+      active_user = user_fixture(%{is_active: true, cameras: [%{brand: "Hikvision", is_active: true, name: "Cam1"}]})
+      _inactive_user = user_fixture(%{is_active: false, cameras: [%{brand: "Hikvision", is_active: true, name: "Cam2"}]})
+
+      result = Accounts.list_users_by_camera_brand("Hikvision", only_active: true)
+
+      assert length(result) == 1
+      [user] = result
+      assert user.id == active_user.id
+    end
+
+    test "list_users_by_camera_brand/2 returns empty list when no users have cameras of specified brand" do
+      _user = user_fixture(%{cameras: [%{brand: "Intelbras", is_active: true, name: "Cam1"}]})
+
+      result = Accounts.list_users_by_camera_brand("Hikvision")
+
+      assert result == []
+    end
+
     test "get_user!/1 returns the user with given id" do
       user = user_fixture()
       assert Accounts.get_user!(user.id) == user
     end
 
     test "create_user/1 with valid data creates a user" do
-      valid_attrs = %{name: "some name", is_active: true}
+      valid_attrs = %{name: "some name", is_active: true, email: "dummy@mail.com"}
 
       assert {:ok, %User{} = user} = Accounts.create_user(valid_attrs)
       assert user.name == "some name"
@@ -56,6 +99,7 @@ defmodule Sentinel.AccountsTest do
     test "create_user/1 with valid data and associated cameras" do
       valid_attrs = %{
         name: "some name",
+        email: "dummy@mail.com",
         is_active: true,
         cameras: [
           %{brand: "Hikvision", is_active: true, name: "some_name"},

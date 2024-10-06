@@ -83,6 +83,44 @@ defmodule Sentinel.Accounts do
   end
 
   @doc """
+  Returns the list of users by camera brand.
+
+  ## Options
+
+  * `:only_active` - If `true`, only returns active users.
+
+  ## Examples
+
+      iex> list_users_by_camera_brand("Canon")
+      [%User{}, ...]
+
+      iex> list_users_by_camera_brand("Canon", only_active: true)
+      [%User{}, ...]
+
+  """
+  def list_users_by_camera_brand(brand, opts \\ []) do
+    only_active? = Keyword.get(opts, :only_active, false)
+
+    query =
+      from u in User,
+        join: c in assoc(u, :cameras),
+        on: c.brand == ^brand
+
+    query =
+      if only_active? do
+        query
+        |> where([u, c], u.is_active == true)
+      else
+        query
+      end
+
+    query
+    |> distinct([u, c], u.id)
+    |> select([u, c], u)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single user.
 
   Raises `Ecto.NoResultsError` if the User does not exist.
