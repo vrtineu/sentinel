@@ -50,15 +50,23 @@ camera_data = fn %User{} = user ->
       random_string = for _ <- 1..10, into: "", do: <<Enum.random(symbols)>>
       camera_name = "#{random_string} #{Enum.random(camera_place)}"
       camera_status = if user.is_active, do: Enum.random([true, false]), else: false
-      Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: camera_status, name: camera_name})
-    end)
 
+      Map.merge(default_data, %{
+        brand: Enum.random(camera_brands),
+        is_active: camera_status,
+        name: camera_name
+      })
+    end)
 
   random_string = for _ <- 1..10, into: "", do: <<Enum.random(symbols)>>
   camera_name = "#{random_string} #{Enum.random(camera_place)}"
   # ensure at least one camera is active if user is also active
   control_record =
-    Map.merge(default_data, %{brand: Enum.random(camera_brands), is_active: user.is_active, name: camera_name})
+    Map.merge(default_data, %{
+      brand: Enum.random(camera_brands),
+      is_active: user.is_active,
+      name: camera_name
+    })
 
   [control_record | cameras]
 end

@@ -23,27 +23,63 @@ defmodule Sentinel.Accounts do
   end
 
   @doc """
-  Returns the list of users and their active cameras.
+  Returns the paginated list of users with active cameras.
 
   ## Examples
 
       iex> list_users_with_active_cameras()
-      [%User{cameras: [%Camera{}, ...]}, ...]
+      %{
+        data: [%User{}, ...],
+        page_number: 1,
+        page_size: 10,
+        total_pages: 1,
+        total_data: 1
+      }
 
+      iex> list_users_with_active_cameras(%{page: 2, limit: 5, camera_name: "XPTO", sort_by: :desc})
+      %{
+        data: [%User{}, ...],
+        page_number: 2,
+        page_size: 5,
+        total_pages: 1,
+        total_data: 1
+      }
   """
-  def list_users_with_active_cameras() do
+  def list_users_with_active_cameras(args \\ %{}) do
+    page = Map.get(args, :page, 1)
+    limit = Map.get(args, :limit, 10)
+    camera_name_filter = Map.get(args, :camera_name, "")
+    sort_direction = Map.get(args, :sort_by, :asc)
+
     query =
       from u in User,
-        left_join: c in Camera,
-        on: u.id == c.user_id and c.is_active == true,
-        distinct: u.id,
-        select: u
+        left_join: c in assoc(u, :cameras),
+        on: c.is_active == true,
+        distinct: u.id
 
-    users = Repo.all(query)
+    active_cameras_query =
+      from c in Camera, where: c.is_active == true and ilike(c.name, ^"#{camera_name_filter}%")
 
-    active_cameras_query = from c in Camera, where: c.is_active == true
+    total_data = Repo.aggregate(query, :count, :id)
+    total_pages = ceil(total_data / limit)
 
-    Repo.preload(users, cameras: active_cameras_query)
+    users =
+      query
+      |> limit(^limit)
+      |> offset(^((page - 1) * limit))
+      |> Repo.all()
+      |> Repo.preload(cameras: active_cameras_query)
+      |> Enum.map(fn user ->
+        %{user | cameras: Enum.sort_by(user.cameras, & &1.name, sort_direction)}
+      end)
+
+    %{
+      data: users,
+      page_number: page,
+      page_size: limit,
+      total_pages: total_pages,
+      total_data: total_data
+    }
   end
 
   @doc """

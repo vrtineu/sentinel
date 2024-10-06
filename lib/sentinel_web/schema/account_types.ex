@@ -1,6 +1,7 @@
 defmodule SentinelWeb.Schema.AccountTypes do
   @moduledoc false
 
+  import SentinelWeb.Schema.CustomTypes
   use Absinthe.Schema.Notation
 
   @desc "A system user"
@@ -13,4 +14,7 @@ defmodule SentinelWeb.Schema.AccountTypes do
     field :inserted_at, :datetime
     field :updated_at, :datetime
   end
+
+  @desc "Paginated users"
+  paginate(:user)
 end
